@@ -10,9 +10,42 @@ This script is provided "as is", without any type of warranty. I am not responsi
 Even though this script exists, you are responsibile of the PDFs generated. Check if the backup of books is legal in your country.
 Redistribution of PDFs is highly discouraged and not supported by the Author.
 
-# 🐳 Installation with Docker (Recommended)
+# 🌐 Web Interface (Easiest - Recommended!)
 
-**Why Docker?** No Python installation needed, no dependency conflicts, works the same on all platforms!
+**NEW!** Beautiful web interface - no command line needed!
+
+**🚀 Quick Start:**
+
+1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+2. Run:
+
+   ```bash
+   # Windows
+   start-web.bat
+
+   # macOS/Linux
+   ./start-web.sh
+   ```
+
+3. Open your browser at **http://localhost:6066**
+4. Click, login, and download! 🎉
+
+📖 **Full Guide:** [WEB-UI-GUIDE.md](docs/WEB-UI-GUIDE.md)
+
+**Features:**
+
+- ✨ Modern, intuitive interface
+- 📊 Real-time download progress
+- 📁 Built-in file manager
+- 📈 Statistics dashboard
+- 🔍 Search functionality
+- 📱 Mobile-friendly
+
+---
+
+# 🐳 CLI with Docker
+
+For command-line users who prefer the terminal.
 
 **Quick Start:**
 
@@ -24,16 +57,17 @@ Redistribution of PDFs is highly discouraged and not supported by the Author.
    docker-compose run --rm pdfgrabber
    ```
 
-**Alternative: Helper Scripts**
+**Helper Scripts:**
 
-- **Windows**: Double-click `start-pdfgrabber.bat`
-- **Linux/macOS**: Run `./start-pdfgrabber.sh`
-- **Any platform with Make**: Run `make start`
+- **Windows**: `start-pdfgrabber.bat`
+- **Linux/macOS**: `./start-pdfgrabber.sh`
+- **Make**: `make start`
 
 📖 **Documentation:**
 
-- **Quick Start Guide:** [DOCKER-QUICKSTART.md](DOCKER-QUICKSTART.md) (English) | [DOCKER-GUIDA-RAPIDA.md](DOCKER-GUIDA-RAPIDA.md) (Italiano)
-- **Full Guide:** [DOCKER-GUIDE.md](DOCKER-GUIDE.md) - Detailed instructions with troubleshooting
+- [DOCKER-QUICKSTART.md](docs/DOCKER-QUICKSTART.md) (English)
+- [DOCKER-GUIDA-RAPIDA.md](docs/DOCKER-GUIDA-RAPIDA.md) (Italiano)
+- [DOCKER-GUIDE.md](docs/DOCKER-GUIDE.md) - Full guide
 
 # Installation (Traditional Method)
 

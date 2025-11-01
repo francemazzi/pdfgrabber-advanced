@@ -1,0 +1,59 @@
+version: "3.8"
+
+services:
+  # Backend API Service
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: pdfgrabber-backend
+    hostname: backend
+    restart: unless-stopped
+    volumes:
+      # Mount user data for persistence (config and files)
+      - ./config.ini:/app/config.ini
+      - ./db.json:/app/db.json
+      - ./files:/app/files
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
+    networks:
+      - pdfgrabber-network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'python -c ''import urllib.request; urllib.request.urlopen("http://localhost:8080/").read()'' || exit 1',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # Frontend Web UI Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: pdfgrabber-frontend
+    hostname: frontend
+    restart: unless-stopped
+    ports:
+      - "6066:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - pdfgrabber-network
+    environment:
+      - NGINX_HOST=localhost
+      - NGINX_PORT=80
+
+networks:
+  pdfgrabber-network:
+    driver: bridge
+    name: pdfgrabber-network
+
+volumes:
+  pdfgrabber-data:
+    name: pdfgrabber-data
