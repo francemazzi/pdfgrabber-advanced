@@ -1,0 +1,48 @@
+# Ignore files that shouldn't be copied into Docker image
+
+# Git
+.git/
+.gitignore
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Documentation
+*.md
+!README.md
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# User data (will be mounted as volumes)
+db.json
+config.ini
+files/
+
+# Temporary files
+*.log
+*.tmp
+.cache/
+

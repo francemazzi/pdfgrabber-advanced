@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  pdfgrabber:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: pdfgrabber-advanced:latest
+    container_name: pdfgrabber-app
+
+    # Enable interactive terminal for CLI
+    stdin_open: true
+    tty: true
+
+    # Mount volumes to persist data
+    volumes:
+      # Persist configuration file
+      - ./config.ini:/app/config.ini
+      # Persist database with users and tokens
+      - ./db.json:/app/db.json
+      # Persist downloaded PDF files
+      - ./files:/app/files
+
+    # Restart policy
+    restart: "no"
+
+    # Display container name
+    hostname: pdfgrabber
