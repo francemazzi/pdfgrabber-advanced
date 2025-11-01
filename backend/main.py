@@ -98,8 +98,15 @@ async def login_service(service: str, credentials: LoginRequest):
             }
         else:
             raise HTTPException(status_code=401, detail="Invalid credentials")
+    except TimeoutError as e:
+        raise HTTPException(status_code=504, detail="Connection timeout - the service is not responding")
+    except ConnectionError as e:
+        raise HTTPException(status_code=503, detail="Cannot connect to the service")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        error_msg = str(e)
+        if "timeout" in error_msg.lower():
+            raise HTTPException(status_code=504, detail="Connection timeout - the service is not responding")
+        raise HTTPException(status_code=500, detail=error_msg)
 
 
 @app.post("/api/services/{service}/check-token")

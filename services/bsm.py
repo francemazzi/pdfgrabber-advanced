@@ -1,4 +1,5 @@
 import requests
+from requests.exceptions import Timeout, ConnectionError, RequestException
 import umsgpack
 import tarfile
 from io import BytesIO
@@ -17,23 +18,30 @@ bsmart_baseurl = "https://www.bsmart.it"
 config = config.getconfig()
 
 def getlogindata(username, password, baseurl):
-	r = requests.post(baseurl + "/api/v5/session", data={"password": password, "email": username})
-	return r.json()
+	try:
+		r = requests.post(baseurl + "/api/v5/session", data={"password": password, "email": username}, timeout=30)
+		return r.json()
+	except Timeout:
+		raise TimeoutError("Connection timeout: bSmart server is not responding")
+	except ConnectionError:
+		raise ConnectionError("Cannot connect to bSmart server")
+	except RequestException as e:
+		raise Exception(f"Request failed: {str(e)}")
 
 def getlibrary(token, baseurl):
-	r = requests.get(baseurl + "/api/v5/books", headers={"AUTH_TOKEN": token}, params={"per_page": 1000000, "page_thumb_size": "medium"})
+	r = requests.get(baseurl + "/api/v5/books", headers={"AUTH_TOKEN": token}, params={"per_page": 1000000, "page_thumb_size": "medium"}, timeout=30)
 	return r.json()
 
 def getpreactivations(token, baseurl):
-	r = requests.get(baseurl + "/api/v5/books/preactivations", headers={"AUTH_TOKEN": token})
+	r = requests.get(baseurl + "/api/v5/books/preactivations", headers={"AUTH_TOKEN": token}, timeout=30)
 	return r.json()
 
 def getbookinfo(token, bookid, revision, operation, baseurl):
-	r = requests.get(baseurl + "/api/v5/books/" + str(bookid) + "/" + str(revision) + "/" + operation, headers={"AUTH_TOKEN": token}, params={"per_page": 1000000})
+	r = requests.get(baseurl + "/api/v5/books/" + str(bookid) + "/" + str(revision) + "/" + operation, headers={"AUTH_TOKEN": token}, params={"per_page": 1000000}, timeout=30)
 	return r.json()
 
 def downloadpack(url, progress, total, done):
-	r = requests.get(url, stream=True)
+	r = requests.get(url, stream=True, timeout=60)
 	length = int(r.headers.get("content-length", 1))
 	file = b""
 	for data in r.iter_content(chunk_size=102400):
@@ -42,7 +50,7 @@ def downloadpack(url, progress, total, done):
 	return tarfile.open(fileobj=BytesIO(file))
 
 def cover(token, bookid, data):
-	r = requests.get(data["cover"])
+	r = requests.get(data["cover"], timeout=30)
 	return r.content
 
 def decryptfile(file):
@@ -55,11 +63,20 @@ def decryptfile(file):
 	return unpad(dec, AES.block_size) + file.read(), header["md5"]
 
 def login(username, password, baseurl=bsmart_baseurl):
-	logindata = getlogindata(username, password, baseurl)
-	if "auth_token" not in logindata:
-		print("Login failed: " + logindata["message"])
-	else:
-		return logindata["auth_token"]
+	try:
+		logindata = getlogindata(username, password, baseurl)
+		if "auth_token" not in logindata:
+			error_msg = logindata.get("message", "Unknown error")
+			print("Login failed: " + error_msg)
+			return None
+		else:
+			return logindata["auth_token"]
+	except (TimeoutError, ConnectionError) as e:
+		print(f"Connection error: {str(e)}")
+		raise
+	except Exception as e:
+		print(f"Login error: {str(e)}")
+		raise
 
 def checktoken(token, baseurl=bsmart_baseurl):
 	test = getlibrary(token, baseurl)
