@@ -14,6 +14,41 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
+REM Create necessary files if they don't exist
+echo 🔧 Checking required files...
+
+REM Create db.json if it doesn't exist
+if not exist db.json (
+    echo    Creating db.json...
+    echo {}> db.json
+) else (
+    REM Check if it's a directory and recreate as file
+    if exist db.json\* (
+        echo    Fixing db.json...
+        rmdir /s /q db.json
+        echo {}> db.json
+    )
+)
+
+REM Create config.ini from default if it doesn't exist
+if not exist config.ini (
+    echo    Creating config.ini...
+    copy config-default.ini config.ini >nul
+) else (
+    REM Check if it's a directory and recreate as file
+    if exist config.ini\* (
+        echo    Fixing config.ini...
+        rmdir /s /q config.ini
+        copy config-default.ini config.ini >nul
+    )
+)
+
+REM Create files directory
+if not exist files mkdir files
+
+echo ✅ All files ready!
+echo.
+
 REM Check if images exist
 docker images | findstr /C:"pdfgrabber" | findstr /C:"backend" >nul 2>&1
 if %errorlevel% neq 0 (

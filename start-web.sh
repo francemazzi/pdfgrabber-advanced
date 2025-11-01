@@ -14,6 +14,29 @@ if ! docker info > /dev/null 2>&1; then
     exit 1
 fi
 
+# Create necessary files if they don't exist
+echo "🔧 Checking required files..."
+
+# Create db.json as empty JSON if it doesn't exist or is a directory
+if [ ! -f db.json ] || [ -d db.json ]; then
+    echo "   Creating db.json..."
+    rm -rf db.json 2>/dev/null
+    echo '{}' > db.json
+fi
+
+# Create config.ini from default if it doesn't exist or is a directory
+if [ ! -f config.ini ] || [ -d config.ini ]; then
+    echo "   Creating config.ini..."
+    rm -rf config.ini 2>/dev/null
+    cp config-default.ini config.ini
+fi
+
+# Create files directory
+mkdir -p files
+
+echo "✅ All files ready!"
+echo ""
+
 # Check if images exist, build if not
 if ! docker images | grep -q "pdfgrabber.*backend"; then
     echo "📦 First time: building Docker images..."

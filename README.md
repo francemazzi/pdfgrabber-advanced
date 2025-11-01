@@ -17,7 +17,16 @@ Redistribution of PDFs is highly discouraged and not supported by the Author.
 **🚀 Quick Start:**
 
 1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-2. Run:
+2. Clone or download this repository:
+
+   ```bash
+   git clone https://github.com/RealRoti/pdfgrabber-advanced
+   cd pdfgrabber-advanced
+   ```
+
+   Or download the ZIP from the green "Code" button and extract it
+
+3. Run the start script:
 
    ```bash
    # Windows
@@ -27,8 +36,8 @@ Redistribution of PDFs is highly discouraged and not supported by the Author.
    ./start-web.sh
    ```
 
-3. Open your browser at **http://localhost:6066**
-4. Click, login, and download! 🎉
+4. Open your browser at **http://localhost:6066**
+5. Click, login, and download! 🎉
 
 📖 **Full Guide:** [WEB-UI-GUIDE.md](docs/WEB-UI-GUIDE.md)
 

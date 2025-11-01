@@ -71,6 +71,18 @@ web-build:
 # Start Web UI
 web-start:
 	@echo "🚀 Starting PDFGrabber Web UI..."
+	@echo "🔧 Checking required files..."
+	@if [ ! -f db.json ] || [ -d db.json ]; then \
+		rm -rf db.json 2>/dev/null; \
+		echo '{}' > db.json; \
+		echo "   ✓ Created db.json"; \
+	fi
+	@if [ ! -f config.ini ] || [ -d config.ini ]; then \
+		rm -rf config.ini 2>/dev/null; \
+		cp config-default.ini config.ini; \
+		echo "   ✓ Created config.ini"; \
+	fi
+	@mkdir -p files
 	docker-compose -f docker-compose.web.yml up -d
 	@echo "✅ Web UI started!"
 	@echo "🌐 Open http://localhost:6066 in your browser"
