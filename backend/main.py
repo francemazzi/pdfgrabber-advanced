@@ -13,6 +13,8 @@ import os
 from pathlib import Path
 import json
 import asyncio
+import queue
+import threading
 
 # Add parent directory to path to import PDFGrabber modules
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -228,8 +230,9 @@ async def handle_download(client_id: str, data: dict):
     book_ids = data.get("book_ids", [])
     
     try:
-        # Get library to get book data
-        books = utils.library(service, token)
+        # Get library to get book data (run in thread to avoid blocking)
+        loop = asyncio.get_event_loop()
+        books = await loop.run_in_executor(None, utils.library, service, token)
         
         for idx, book_id in enumerate(book_ids):
             if book_id not in books:
@@ -251,24 +254,77 @@ async def handle_download(client_id: str, data: dict):
                 "total": len(book_ids)
             })
             
-            # Progress callback
-            async def progress_callback(percentage, message=""):
-                await websocket.send_json({
-                    "status": "progress",
-                    "book_id": book_id,
-                    "progress": percentage,
-                    "message": message,
-                    "current": idx + 1,
-                    "total": len(book_ids)
-                })
+            # Progress callback with thread-safe queue
+            progress_queue = queue.Queue()
+            download_complete = threading.Event()
+            
+            def sync_progress(perc, msg=""):
+                # Put progress updates in thread-safe queue
+                try:
+                    progress_queue.put_nowait({"perc": perc, "msg": msg})
+                    print(f"Progress update queued: {perc}% - {msg}")
+                except queue.Full:
+                    pass  # Skip if queue is full
+            
+            async def send_progress():
+                # Monitor queue and send progress updates
+                while not download_complete.is_set():
+                    try:
+                        # Check queue for updates
+                        while not progress_queue.empty():
+                            progress_data = progress_queue.get_nowait()
+                            await websocket.send_json({
+                                "status": "progress",
+                                "book_id": book_id,
+                                "progress": progress_data["perc"],
+                                "message": progress_data["msg"],
+                                "current": idx + 1,
+                                "total": len(book_ids)
+                            })
+                        await asyncio.sleep(0.2)  # Check every 200ms
+                    except Exception as e:
+                        print(f"Error sending progress: {e}")
+                        break
             
             # Download book
             try:
-                # Wrap sync progress in async
-                def sync_progress(perc, msg=""):
-                    asyncio.create_task(progress_callback(perc, msg))
+                # Start progress monitor task
+                progress_task = asyncio.create_task(send_progress())
                 
-                pdf_path = utils.downloadbook(service, token, book_id, book_data, sync_progress)
+                # Run download in thread to not block event loop
+                def download_wrapper():
+                    try:
+                        print(f"Starting download for book {book_id}")
+                        result = utils.downloadbook(service, token, book_id, book_data, sync_progress)
+                        print(f"Download completed for book {book_id}, file: {result}")
+                        return result
+                    except Exception as e:
+                        print(f"ERROR in download_wrapper: {type(e).__name__}: {str(e)}")
+                        import traceback
+                        traceback.print_exc()
+                        raise
+                    finally:
+                        download_complete.set()
+                        print(f"Download complete event set for book {book_id}")
+                
+                pdf_path = await loop.run_in_executor(None, download_wrapper)
+                print(f"After run_in_executor, pdf_path: {pdf_path}")
+                
+                # Wait for progress task to send remaining updates
+                await asyncio.sleep(0.5)
+                progress_task.cancel()
+                print(f"Progress task cancelled for book {book_id}")
+                
+                # Send final progress
+                await websocket.send_json({
+                    "status": "progress",
+                    "book_id": book_id,
+                    "progress": 100,
+                    "message": "Download completed",
+                    "current": idx + 1,
+                    "total": len(book_ids)
+                })
+                print(f"Sent final progress for book {book_id}")
                 
                 # Send completion message
                 await websocket.send_json({
@@ -279,8 +335,12 @@ async def handle_download(client_id: str, data: dict):
                     "current": idx + 1,
                     "total": len(book_ids)
                 })
+                print(f"Sent completion message for book {book_id}")
                 
             except Exception as e:
+                print(f"ERROR in download handling: {type(e).__name__}: {str(e)}")
+                import traceback
+                traceback.print_exc()
                 await websocket.send_json({
                     "status": "error",
                     "book_id": book_id,
@@ -290,12 +350,17 @@ async def handle_download(client_id: str, data: dict):
                 })
         
         # All downloads complete
+        print(f"All downloads complete, sending all_completed message")
         await websocket.send_json({
             "status": "all_completed",
             "total": len(book_ids)
         })
+        print(f"all_completed message sent")
         
     except Exception as e:
+        print(f"ERROR in handle_download: {type(e).__name__}: {str(e)}")
+        import traceback
+        traceback.print_exc()
         await websocket.send_json({
             "status": "error",
             "message": str(e)

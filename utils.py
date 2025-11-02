@@ -48,7 +48,7 @@ def downloadbook(servicename, token, bookid, data, progress):
 	pdf.set_metadata(metadata)
 	progress(99, "Saving pdf")
 	if config.getboolean(servicename, "Compress", fallback=False):
-		pdf.save(pdfpath, garbage=config.getint(servicename, "Garbage", fallback=3), clean=config.getboolean(servicename, "Clean", fallback=True), linear=config.getboolean(servicename, "Linearize", fallback=True))
+		pdf.save(pdfpath, garbage=config.getint(servicename, "Garbage", fallback=3), clean=config.getboolean(servicename, "Clean", fallback=True))
 	else:
 		pdf.save(pdfpath)
 
@@ -77,7 +77,7 @@ def downloadoneshot(servicename, url, progress):
 		pdf.ez_save(pdfpath)
 	else:
 		if config.getboolean(servicename, "Compress", fallback=False):
-			pdf.save(pdfpath, garbage=config.getint(servicename, "Garbage", fallback=3), clean=config.getboolean(servicename, "Clean", fallback=True), linear=config.getboolean(servicename, "Linearize", fallback=True))
+			pdf.save(pdfpath, garbage=config.getint(servicename, "Garbage", fallback=3), clean=config.getboolean(servicename, "Clean", fallback=True))
 		else:
 			pdf.save(pdfpath)
 
