@@ -1,0 +1,77 @@
+NON-COMMERCIAL RESEARCH LICENSE
+================================
+
+Copyright (c) 2024 PDFGrabber Advanced Contributors
+
+EDUCATIONAL AND SECURITY RESEARCH USE ONLY
+
+This software and associated documentation files (the "Software") are provided 
+for EDUCATIONAL and SECURITY RESEARCH purposes only.
+
+PERMITTED USES:
+---------------
+Subject to the conditions below, you are permitted to:
+1. Use the Software for personal, non-commercial educational purposes
+2. Use the Software for legitimate security research to identify vulnerabilities
+3. Modify the Software for your own research purposes
+4. Study how the Software works for educational purposes
+
+PROHIBITED USES:
+----------------
+You are expressly FORBIDDEN from:
+1. Using the Software for any commercial purpose
+2. Selling, sublicensing, or distributing the Software for profit
+3. Using the Software to circumvent DRM for illegal purposes
+4. Using the Software to violate copyright laws or terms of service
+5. Redistributing copyrighted content obtained using the Software
+6. Using the Software in any way that violates applicable laws
+7. Distributing modified versions without including this license
+8. Using the Software for piracy or unauthorized content distribution
+
+CONDITIONS:
+-----------
+1. You must include this license and copyright notice in all copies
+2. You must clearly mark any modifications you make to the Software
+3. You acknowledge that circumventing DRM may be illegal in your jurisdiction
+4. You accept full responsibility for your use of the Software
+5. You will only use the Software on content you legally own or have permission to access
+6. You will report any security vulnerabilities to affected parties responsibly
+
+DISCLAIMER:
+-----------
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+LEGAL NOTICE:
+-------------
+The use of this Software may be restricted or prohibited in your jurisdiction.
+Users are solely responsible for ensuring compliance with all applicable laws,
+including but not limited to:
+- Digital Millennium Copyright Act (DMCA) in the United States
+- EU Copyright Directive (2001/29/EC and 2019/790)
+- Italian Copyright Law (Legge 633/1941)
+- Terms of Service of third-party platforms
+
+The authors do not condone, support, or encourage any illegal use of this Software.
+
+By using this Software, you acknowledge that you have read, understood, and agree
+to be bound by these terms and conditions.
+
+ATTRIBUTION:
+------------
+This project is a fork of PDFGrabber by FelixFrog (https://github.com/FelixFrog/pdfgrabber)
+Original project discontinued as of December 11, 2024.
+
+CONTACT:
+--------
+If you discover security vulnerabilities through the use of this Software,
+you are encouraged to report them responsibly to the affected service providers.
+
+Last Updated: November 4, 2025
+

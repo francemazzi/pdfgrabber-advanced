@@ -1,10 +1,67 @@
+# 🔐 PDFGrabber Advanced - Security Research Tool
+
+> **⚠️ WARNING:** This is a security research and educational tool. Read the full legal disclaimer below before proceeding.
+
+[![Research Purpose](https://img.shields.io/badge/Purpose-Security%20Research-yellow)](https://github.com/RealRoti/pdfgrabber-advanced)
+[![Educational Use](https://img.shields.io/badge/Use-Educational%20Only-red)](https://github.com/RealRoti/pdfgrabber-advanced)
+[![Not for Piracy](https://img.shields.io/badge/Piracy-Not%20Supported-critical)](https://github.com/RealRoti/pdfgrabber-advanced)
+[![Non-Commercial](https://img.shields.io/badge/License-Non--Commercial-blue)](LICENSE)
+
+---
+
 # What is this?
 
 This is an unofficial fork from [PDFGrabber](https://github.com/FelixFrog/pdfgrabber), a vendor-agnostic script is used to download pdfs from different services.
 
 ❌ Important: the original project has been discontinued. For this reason, no more updates will be relased. Last update from source: 11 dec 2024
 
-# Disclaimer
+---
+
+# ⚠️ IMPORTANT LEGAL DISCLAIMER / DISCLAIMER LEGALE IMPORTANTE
+
+## 🔬 EDUCATIONAL AND SECURITY RESEARCH PURPOSES ONLY
+
+This software is provided **strictly for educational and security research purposes** to:
+
+- Demonstrate security vulnerabilities in digital content protection systems
+- Conduct academic research on DRM implementations
+- Help content providers identify and improve their security measures
+- Promote awareness about digital rights and content protection weaknesses
+
+## 🚫 THIS SOFTWARE MUST NOT BE USED FOR:
+
+- Unauthorized access to copyrighted materials
+- Circumventing digital rights management (DRM) for illegal purposes
+- Redistributing protected content without permission
+- Any commercial use or profit
+- Violating terms of service of any platform
+
+## ⚖️ LEGAL NOTICE:
+
+- Users are **solely responsible** for ensuring their use complies with local laws
+- The circumvention of DRM may be **illegal in your jurisdiction** (DMCA in USA, EU Copyright Directive, etc.)
+- This tool is intended to demonstrate the need for improved security measures by content providers
+- The authors assume **NO responsibility** for misuse of this software
+- By using this software, you acknowledge that you understand the legal implications in your country
+
+## 📚 RESPONSIBLE USE:
+
+- Only use with content you **legally own** or have explicit permission to access
+- Check your local laws regarding DRM circumvention for research purposes
+- Contact content providers directly if you discover security vulnerabilities
+- Do not share, redistribute, or publish any protected content obtained using this tool
+
+## 🇮🇹 AVVISO PER UTENTI ITALIANI:
+
+La circumvenzione di protezioni tecnologiche può violare il Codice dei Diritti d'Autore italiano (Legge 633/1941 e successive modifiche). Questo software è fornito esclusivamente per scopi di ricerca e studio personale su contenuti di cui si possiede già legittima licenza d'uso.
+
+## 📄 LICENSE:
+
+This software is licensed under a **Non-Commercial License**. See the [LICENSE](LICENSE) file for details. Commercial use is strictly prohibited.
+
+---
+
+# Original Disclaimer
 
 This script is provided "as is", without any type of warranty. I am not responsible of any harm that this may cause.
 Even though this script exists, you are responsibile of the PDFs generated. Check if the backup of books is legal in your country.
@@ -78,22 +135,87 @@ For command-line users who prefer the terminal.
 - [DOCKER-GUIDA-RAPIDA.md](docs/DOCKER-GUIDA-RAPIDA.md) (Italiano)
 - [DOCKER-GUIDE.md](docs/DOCKER-GUIDE.md) - Full guide
 
-# Installation (Traditional Method)
+# 💻 Installation Without Docker
 
-1. download the latest version of [Python](https://www.python.org/downloads/)
-   - on windows, when installing though the set up wizard, make sure to select the checkbox to add python to `PATH`
-   - on linux and macos, use your package manager of choice (`brew install python3` or `apt install python3`, etc...)
-2. downlaod the pdfgrabber repo
-   - using git: `git clone https://github.com/RealRoti/pdfgrabber-advanced`
-   - manually: download the zip (green button labeled "code") and extract it
-3. open your local clone of pdfgrabber
-4. open the terminal in that directory and run:
-   1. `pip install -r requirements.txt` (takes care of installing every needed libraries)
-   2. run the script
-      - `python3 main.py` (linux and macos)
-      - `py main.py` (windows)
-5. once inside the pdfgrabber CLI:
-   - press `r`: register a new account
-   - choose what to do (it's listed):
-     - to download a book: press `d` and follow the instructions.
-     - the output file will be `files/<service>/<book name>.pdf`
+**For users who don't have Docker installed**, you can run PDFGrabber locally using Python virtual environments (no dependency conflicts!).
+
+## Web Interface (Recommended)
+
+**Quick Start:**
+
+1. **Download Python 3.10 or higher** from [python.org](https://www.python.org/downloads/)
+
+   - **Windows**: Check "Add Python to PATH" during installation
+   - **macOS**: `brew install python3`
+   - **Linux**: `sudo apt install python3 python3-venv`
+
+2. **Download PDFGrabber:**
+
+   ```bash
+   git clone https://github.com/RealRoti/pdfgrabber-advanced
+   cd pdfgrabber-advanced
+   ```
+
+   Or download the ZIP from the green "Code" button and extract it
+
+3. **Run the start script:**
+
+   ```bash
+   # Windows
+   start.bat
+
+   # macOS/Linux
+   ./start.sh
+   ```
+
+The script will:
+
+- ✅ Create an isolated virtual environment
+- ✅ Install all dependencies automatically
+- ✅ Start the web server on **http://localhost:6066**
+- ✅ Open your browser automatically
+
+**That's it!** No Docker, no conflicts, no hassle! 🎉
+
+---
+
+## CLI (Command Line)
+
+For terminal enthusiasts who prefer the classic interface:
+
+1. **Create virtual environment:**
+
+   ```bash
+   python3 -m venv venv
+
+   # Activate it:
+   source venv/bin/activate  # macOS/Linux
+   venv\Scripts\activate     # Windows
+   ```
+
+2. **Install dependencies:**
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Run PDFGrabber CLI:**
+
+   ```bash
+   python3 main.py  # macOS/Linux
+   python main.py   # Windows
+   ```
+
+4. **Using the CLI:**
+   - Press `r`: Register a new profile
+   - Press `d`: Download a book
+   - Downloaded files: `files/<service>/<book name>.pdf`
+
+**Why Virtual Environment?**
+
+- ✅ No dependency conflicts with other Python projects
+- ✅ Isolated environment with only required packages
+- ✅ Easy to remove (just delete the `venv` folder)
+- ✅ No admin/sudo rights needed
+
+**Troubleshooting:** Having issues? Check the [Troubleshooting Guide](docs/NO-DOCKER-TROUBLESHOOTING.md) 🔧

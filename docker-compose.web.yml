@@ -23,7 +23,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          'python -c ''import urllib.request; urllib.request.urlopen("http://localhost:8080/").read()'' || exit 1',
+          'python -c ''import urllib.request; urllib.request.urlopen("http://localhost:8080/api").read()'' || exit 1',
         ]
       interval: 30s
       timeout: 10s

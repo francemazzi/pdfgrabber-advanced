@@ -6,6 +6,7 @@ FastAPI backend for PDFGrabber web interface
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Optional, Dict, List
 import sys
@@ -59,7 +60,7 @@ active_connections: Dict[str, WebSocket] = {}
 
 # ============== ENDPOINTS ==============
 
-@app.get("/")
+@app.get("/api")
 async def root():
     """API root endpoint"""
     return {
@@ -397,6 +398,25 @@ async def get_stats():
             stats["total_size"] += service_size
     
     return stats
+
+
+# Mount static files and serve frontend
+# This must be done AFTER all API routes to avoid conflicts
+frontend_path = Path(__file__).parent.parent / "frontend"
+if frontend_path.exists():
+    # Serve static assets (CSS, JS, images)
+    static_path = frontend_path / "static"
+    if static_path.exists():
+        app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
+    
+    # Serve index.html at root
+    @app.get("/", response_class=FileResponse)
+    async def serve_frontend_root():
+        """Serve the frontend index.html at root"""
+        index_file = frontend_path / "index.html"
+        if index_file.exists():
+            return FileResponse(str(index_file))
+        raise HTTPException(status_code=404, detail="Frontend not found")
 
 
 if __name__ == "__main__":
