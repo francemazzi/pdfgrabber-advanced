@@ -106,6 +106,21 @@ Redistribution of PDFs is highly discouraged and not supported by the Author.
 - 📈 Statistics dashboard
 - 🔍 Search functionality
 - 📱 Mobile-friendly
+- 🔑 **NEW: bSmart Dynamic** - Auto-extracts encryption keys (more reliable!)
+
+### 🆕 bSmart Dynamic - What's New?
+
+PDFGrabber now includes **two versions** of the bSmart service:
+
+- **bSmart** - Standard version (fast, but may stop working if bSmart updates encryption)
+- **bSmart Dynamic (Auto-Key)** ⭐ - Automatically extracts encryption keys from the website
+  - ✅ More reliable and future-proof
+  - ✅ Continues working even when bSmart updates their security
+  - ✅ Only ~2 seconds slower on first use (then uses cache)
+
+**Which one to use?** We recommend **bSmart Dynamic** for better long-term reliability!
+
+📖 **Learn more:** [bSmart Dynamic Guide](docs/BSMART-DYNAMIC-INFO.md)
 
 ---
 
