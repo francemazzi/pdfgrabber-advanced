@@ -122,6 +122,28 @@ PDFGrabber now includes **two versions** of the bSmart service:
 
 📖 **Learn more:** [bSmart Dynamic Guide](docs/BSMART-DYNAMIC-INFO.md)
 
+### 🔄 Update Scripts
+
+Keep your PDFGrabber installation up to date with these convenient scripts:
+
+**Windows:**
+```cmd
+update.bat
+```
+
+**Linux/macOS:**
+```bash
+./update.sh
+```
+
+These scripts will:
+1. ✅ Pull latest code from Git
+2. ✅ Stop Docker containers
+3. ✅ Rebuild and restart with new code
+4. ✅ Open browser at localhost:6066
+
+Perfect for getting new features and bug fixes!
+
 ---
 
 # 🐳 CLI with Docker
