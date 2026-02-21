@@ -3,9 +3,9 @@ PDFGrabber Web API
 FastAPI backend for PDFGrabber web interface
 """
 
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Optional, Dict, List
@@ -16,6 +16,10 @@ import json
 import asyncio
 import queue
 import threading
+import zipfile
+import io
+import datetime
+import fitz  # PyMuPDF
 
 # Add parent directory to path to import PDFGrabber modules
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -163,28 +167,76 @@ async def get_library(service: str, token_req: TokenRequest):
 
 @app.get("/api/files")
 async def list_downloaded_files():
-    """List all downloaded PDF files"""
+    """List all downloaded PDF files with metadata"""
     files_dir = Path("files")
     if not files_dir.exists():
         return {"files": []}
-    
+
     files_list = []
     for service_dir in files_dir.iterdir():
         if service_dir.is_dir():
             for pdf_file in service_dir.glob("*.pdf"):
                 stat = pdf_file.stat()
+
+                # Extract PDF metadata
+                metadata = {}
+                try:
+                    doc = fitz.open(str(pdf_file))
+                    meta = doc.metadata
+                    metadata = {
+                        "title": meta.get("title", ""),
+                        "author": meta.get("author", ""),
+                        "subject": meta.get("subject", ""),
+                        "creator": meta.get("creator", ""),
+                        "producer": meta.get("producer", ""),
+                        "pages": doc.page_count,
+                    }
+                    doc.close()
+                except Exception:
+                    pass
+
+                # Format download date
+                download_date = datetime.datetime.fromtimestamp(stat.st_mtime).isoformat()
+
                 files_list.append({
                     "service": service_dir.name,
                     "filename": pdf_file.name,
                     "path": str(pdf_file.relative_to(files_dir)),
                     "size": stat.st_size,
-                    "modified": stat.st_mtime
+                    "modified": stat.st_mtime,
+                    "download_date": download_date,
+                    "metadata": metadata
                 })
-    
+
     return {
         "files": sorted(files_list, key=lambda x: x["modified"], reverse=True),
         "count": len(files_list)
     }
+
+
+@app.get("/api/files/download-zip")
+async def download_zip(paths: str = Query(..., description="Comma-separated service/filename paths")):
+    """Download multiple PDF files as a ZIP archive"""
+    file_paths = [p.strip() for p in paths.split(",") if p.strip()]
+    if not file_paths:
+        raise HTTPException(status_code=400, detail="No files specified")
+
+    files_dir = Path("files")
+    zip_buffer = io.BytesIO()
+
+    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+        for rel_path in file_paths:
+            full_path = files_dir / rel_path
+            if full_path.exists() and full_path.suffix == ".pdf":
+                zf.write(str(full_path), arcname=full_path.name)
+
+    zip_buffer.seek(0)
+
+    return StreamingResponse(
+        zip_buffer,
+        media_type="application/zip",
+        headers={"Content-Disposition": "attachment; filename=pdfgrabber_download.zip"}
+    )
 
 
 @app.get("/api/files/{service}/{filename}")
@@ -193,7 +245,7 @@ async def download_file(service: str, filename: str):
     file_path = Path("files") / service / filename
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="File not found")
-    
+
     return FileResponse(
         path=str(file_path),
         filename=filename,
@@ -234,7 +286,9 @@ async def handle_download(client_id: str, data: dict):
         # Get library to get book data (run in thread to avoid blocking)
         loop = asyncio.get_event_loop()
         books = await loop.run_in_executor(None, utils.library, service, token)
-        
+
+        completed_files = []
+
         for idx, book_id in enumerate(book_ids):
             if book_id not in books:
                 await websocket.send_json({
@@ -327,6 +381,9 @@ async def handle_download(client_id: str, data: dict):
                 })
                 print(f"Sent final progress for book {book_id}")
                 
+                # Track completed file path
+                completed_files.append(f"{service}/{Path(pdf_path).name}")
+
                 # Send completion message
                 await websocket.send_json({
                     "status": "completed",
@@ -354,7 +411,8 @@ async def handle_download(client_id: str, data: dict):
         print(f"All downloads complete, sending all_completed message")
         await websocket.send_json({
             "status": "all_completed",
-            "total": len(book_ids)
+            "total": len(book_ids),
+            "files": completed_files
         })
         print(f"all_completed message sent")
         

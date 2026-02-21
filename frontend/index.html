@@ -77,7 +77,7 @@
               <i class="fas fa-chart-bar mr-2"></i>Statistics
             </button>
             <button
-              @click="view = 'files'"
+              @click="view = 'files'; loadFiles()"
               class="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition"
             >
               <i class="fas fa-folder mr-2"></i>My Files
@@ -313,29 +313,52 @@
         <div class="grid grid-cols-1 gap-4">
           <template x-for="file in files" :key="file.path">
             <div
-              class="bg-white rounded-lg shadow-md p-4 flex items-center justify-between"
+              class="bg-white rounded-lg shadow-md p-4"
             >
-              <div class="flex items-center space-x-4">
-                <i class="fas fa-file-pdf text-red-500 text-3xl"></i>
-                <div>
-                  <h3
-                    class="font-semibold text-gray-800"
-                    x-text="file.filename"
-                  ></h3>
-                  <p class="text-sm text-gray-500">
-                    <span x-text="file.service"></span> ·
-                    <span x-text="formatSize(file.size)"></span>
-                  </p>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4 flex-1">
+                  <i class="fas fa-file-pdf text-red-500 text-3xl"></i>
+                  <div class="flex-1">
+                    <h3
+                      class="font-semibold text-gray-800"
+                      x-text="file.metadata?.title || file.filename"
+                    ></h3>
+                    <p class="text-sm text-gray-500">
+                      <span x-text="file.service"></span> ·
+                      <span x-text="formatSize(file.size)"></span>
+                      <template x-if="file.metadata?.pages">
+                        <span> · <span x-text="file.metadata.pages"></span> pagine</span>
+                      </template>
+                    </p>
+                    <div class="flex items-center gap-3 mt-1 text-xs text-gray-400">
+                      <span>
+                        <i class="fas fa-calendar-alt mr-1"></i>
+                        <span x-text="formatDate(file.download_date)"></span>
+                      </span>
+                      <template x-if="file.metadata?.author">
+                        <span>
+                          <i class="fas fa-user mr-1"></i>
+                          <span x-text="file.metadata.author"></span>
+                        </span>
+                      </template>
+                      <template x-if="file.metadata?.creator">
+                        <span>
+                          <i class="fas fa-pen mr-1"></i>
+                          <span x-text="file.metadata.creator"></span>
+                        </span>
+                      </template>
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              <a
-                :href="`/api/files/${file.service}/${file.filename}`"
-                target="_blank"
-                class="px-4 py-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg transition"
-              >
-                <i class="fas fa-external-link-alt mr-2"></i>Open
-              </a>
+                <a
+                  :href="`/api/files/${file.service}/${file.filename}`"
+                  :download="file.filename"
+                  class="px-4 py-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg transition"
+                >
+                  <i class="fas fa-download mr-2"></i>Scarica
+                </a>
+              </div>
             </div>
           </template>
         </div>

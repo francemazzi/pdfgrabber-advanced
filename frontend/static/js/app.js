@@ -237,16 +237,21 @@ function pdfGrabberApp() {
       } else if (status === "error") {
         this.downloadProgress[book_id].message = "Error: " + message;
       } else if (status === "all_completed") {
+        const completedFiles = data.files || [];
+
         setTimeout(() => {
           this.downloading = false;
           this.selectedBooks = [];
           this.ws.close();
 
+          // Auto-download the ZIP with all completed PDFs
+          if (completedFiles.length > 0) {
+            this.autoDownloadZip(completedFiles);
+          }
+
           // Reload files
           this.loadFiles();
           this.loadStats();
-
-          alert("All downloads completed!");
         }, 1500);
       }
     },
@@ -287,6 +292,20 @@ function pdfGrabberApp() {
       );
     },
 
+    // Auto-download ZIP with completed files
+    autoDownloadZip(filePaths) {
+      const paths = filePaths.join(",");
+      const url = `${this.apiUrl}/api/files/download-zip?paths=${encodeURIComponent(paths)}`;
+
+      // Trigger browser download via hidden link
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "pdfgrabber_download.zip";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    },
+
     // Format file size
     formatSize(bytes) {
       if (bytes === 0) return "0 B";
@@ -294,6 +313,19 @@ function pdfGrabberApp() {
       const sizes = ["B", "KB", "MB", "GB"];
       const i = Math.floor(Math.log(bytes) / Math.log(k));
       return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
+    },
+
+    // Format date
+    formatDate(isoString) {
+      if (!isoString) return "";
+      const d = new Date(isoString);
+      return d.toLocaleDateString("it-IT", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     },
   };
 }
