@@ -6,12 +6,12 @@ PDFGrabber Web UI is a modern, intuitive web interface for downloading your digi
 
 ## 🚀 Quick Start
 
-### Option 1: Using Helper Scripts (Easiest)
+### Recommended: one launcher
 
 **Windows:**
 
 ```bash
-# Double-click
+# Double-click, then press Enter for Docker
 start-web.bat
 
 # Or from command line
@@ -21,22 +21,27 @@ start-web.bat
 **macOS/Linux:**
 
 ```bash
-./start-web.sh
+bash start-web.sh
 ```
 
-### Option 2: Using Docker Compose
+The launcher can start Docker Desktop, builds the application, waits for the
+health check, and opens the browser. Choose option 2 for a local Python setup.
+For unattended use, pass `--docker` or `--local`; pass `--no-open` to keep the
+browser closed.
+
+### Advanced: Docker Compose
 
 ```bash
 # Build images (first time only)
-docker-compose -f docker-compose.web.yml build
+docker compose -f docker-compose.web.yml build
 
 # Start the web UI
-docker-compose -f docker-compose.web.yml up -d
+docker compose -f docker-compose.web.yml up -d
 
-# Open browser at http://localhost:6066
+# Open the browser only after /api/services responds
 ```
 
-### Option 3: Using Make
+### Advanced: Make
 
 ```bash
 make web-start
@@ -49,6 +54,19 @@ make web-start
 Once started, open your browser and go to:
 
 **👉 http://localhost:6066**
+
+## Startup error codes
+
+| Code | Meaning / Significato | What to do / Cosa fare |
+|---|---|---|
+| `PG-START-001` | Docker is not installed / Docker non installato | Install Docker Desktop from the link shown by the launcher. |
+| `PG-START-002` | Docker did not start / Docker non avviato | Open Docker Desktop, wait until it is ready, then retry. |
+| `PG-START-003` | Compose is unavailable / Compose non disponibile | Update Docker Desktop. |
+| `PG-START-004` | Port 6066 is busy / Porta 6066 occupata | Close the other program or stop the previous installation. |
+| `PG-START-005` | Local data path is invalid / Percorso dati non valido | Restore the named file or folder; the launcher does not delete it. |
+| `PG-START-006` | Container startup failed / Avvio container fallito | Send `pdfgrabber-start.log` to support. |
+| `PG-START-007` | Health check timed out / Verifica scaduta | Send the displayed Docker status and logs to support. |
+| `PG-START-101`–`107` | Local Python setup failed / Errore Python locale | Send `pdfgrabber-setup.log` or `server.log` to support. |
 
 ---
 
@@ -185,44 +203,44 @@ Features:
 ### Start the Web UI
 
 ```bash
-docker-compose -f docker-compose.web.yml up -d
+docker compose -f docker-compose.web.yml up -d
 ```
 
 ### Stop the Web UI
 
 ```bash
-docker-compose -f docker-compose.web.yml down
+docker compose -f docker-compose.web.yml down
 ```
 
 ### View Logs
 
 ```bash
 # All logs
-docker-compose -f docker-compose.web.yml logs -f
+docker compose -f docker-compose.web.yml logs -f
 
 # Backend only
-docker-compose -f docker-compose.web.yml logs -f backend
+docker compose -f docker-compose.web.yml logs -f backend
 
 # Frontend only
-docker-compose -f docker-compose.web.yml logs -f frontend
+docker compose -f docker-compose.web.yml logs -f frontend
 ```
 
 ### Rebuild Images
 
 ```bash
-docker-compose -f docker-compose.web.yml build --no-cache
+docker compose -f docker-compose.web.yml build --no-cache
 ```
 
 ### Restart Services
 
 ```bash
-docker-compose -f docker-compose.web.yml restart
+docker compose -f docker-compose.web.yml restart
 ```
 
 ### Check Status
 
 ```bash
-docker-compose -f docker-compose.web.yml ps
+docker compose -f docker-compose.web.yml ps
 ```
 
 ---
@@ -295,8 +313,8 @@ services:
 Then restart:
 
 ```bash
-docker-compose -f docker-compose.web.yml down
-docker-compose -f docker-compose.web.yml up -d
+docker compose -f docker-compose.web.yml down
+docker compose -f docker-compose.web.yml up -d
 ```
 
 ---
@@ -317,21 +335,21 @@ netstat -ano | findstr :6066  # Windows
 
 ```bash
 # Check backend logs
-docker-compose -f docker-compose.web.yml logs backend
+docker compose -f docker-compose.web.yml logs backend
 
 # Common fix: rebuild
-docker-compose -f docker-compose.web.yml build backend --no-cache
-docker-compose -f docker-compose.web.yml up -d
+docker compose -f docker-compose.web.yml build backend --no-cache
+docker compose -f docker-compose.web.yml up -d
 ```
 
 ### Frontend Shows Error
 
 ```bash
 # Check if backend is healthy
-docker-compose -f docker-compose.web.yml ps
+docker compose -f docker-compose.web.yml ps
 
 # Restart frontend
-docker-compose -f docker-compose.web.yml restart frontend
+docker compose -f docker-compose.web.yml restart frontend
 ```
 
 ### Downloads Not Working
@@ -345,7 +363,7 @@ docker-compose -f docker-compose.web.yml restart frontend
 
 ```bash
 # Verify services are running
-docker-compose -f docker-compose.web.yml ps
+docker compose -f docker-compose.web.yml ps
 
 # Check if port is exposed
 docker ps | grep pdfgrabber
@@ -417,11 +435,11 @@ To update to the latest version:
 git pull
 
 # Rebuild images
-docker-compose -f docker-compose.web.yml build
+docker compose -f docker-compose.web.yml build
 
 # Restart services
-docker-compose -f docker-compose.web.yml down
-docker-compose -f docker-compose.web.yml up -d
+docker compose -f docker-compose.web.yml down
+docker compose -f docker-compose.web.yml up -d
 ```
 
 ---

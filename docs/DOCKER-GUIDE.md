@@ -61,7 +61,7 @@ sudo usermod -aG docker $USER
 3. Restart your computer or logout/login
 4. Install Docker Compose:
 ```bash
-sudo apt-get install docker-compose-plugin
+sudo apt-get install docker compose-plugin
 ```
 
 ---
@@ -82,13 +82,13 @@ sudo apt-get install docker-compose-plugin
 
 3. **Build the Docker image** (first time only)
    ```bash
-   docker-compose build
+   docker compose build
    ```
    ⏱️ This takes 5-10 minutes the first time (downloads everything needed)
 
 4. **Start PDFGrabber**
    ```bash
-   docker-compose run --rm pdfgrabber
+   docker compose run --rm pdfgrabber
    ```
    
    ✅ The PDFGrabber interface will open as usual!
@@ -100,17 +100,17 @@ Every time you want to use PDFGrabber:
 1. Open terminal in the pdfgrabber-advanced folder
 2. Run:
    ```bash
-   docker-compose run --rm pdfgrabber
+   docker compose run --rm pdfgrabber
    ```
 
 ### Method 2: Using Terminal Only (Advanced Users)
 
 ```bash
 # First time: build the image
-docker-compose build
+docker compose build
 
 # Every time: start PDFGrabber
-docker-compose run --rm pdfgrabber
+docker compose run --rm pdfgrabber
 ```
 
 ---
@@ -153,13 +153,13 @@ If something goes wrong and you want to start from scratch:
 
 ```bash
 # Remove the container
-docker-compose down
+docker compose down
 
 # Also remove the image
 docker rmi pdfgrabber-advanced:latest
 
 # Rebuild
-docker-compose build
+docker compose build
 ```
 
 **Note:** Your PDFs, configurations, and database will NOT be deleted!
@@ -182,7 +182,7 @@ sudo usermod -aG docker $USER
 ### "port is already allocated"
 - This shouldn't happen with PDFGrabber, but if it does:
   ```bash
-  docker-compose down
+  docker compose down
   ```
 
 ### "Cannot connect to the Docker daemon"
@@ -197,7 +197,7 @@ sudo usermod -aG docker $USER
 ### "playwright install" error
 - Rebuild the image:
   ```bash
-  docker-compose build --no-cache
+  docker compose build --no-cache
   ```
 
 ---
@@ -230,15 +230,15 @@ sudo usermod -aG docker $USER
 
 ## 🎓 Command Explanation
 
-### `docker-compose build`
+### `docker compose build`
 Builds the PDFGrabber "image" (like creating a mold). Done only the first time.
 
-### `docker-compose run --rm pdfgrabber`
+### `docker compose run --rm pdfgrabber`
 - `run`: Start PDFGrabber
 - `--rm`: Automatically remove the container when you exit (keeps things clean)
 - `pdfgrabber`: Name of the service to start
 
-### `docker-compose down`
+### `docker compose down`
 Stops and removes all containers of the project.
 
 ---
@@ -251,7 +251,7 @@ Stops and removes all containers of the project.
 | **Python version issues** | Possible | Impossible |
 | **Playwright issues** | Frequent | Never |
 | **Works same everywhere** | No | Yes |
-| **Easy to update** | Complicated | `docker-compose build` |
+| **Easy to update** | Complicated | `docker compose build` |
 | **Disk space** | ~200 MB | ~1.3 GB |
 | **Isolation** | No | Complete |
 
@@ -262,7 +262,7 @@ Stops and removes all containers of the project.
 1. **Check this guide** - covers 99% of problems
 2. **Verify Docker Desktop** - must be green/active
 3. **Restart Docker Desktop** - solves many issues
-4. **Rebuild everything** - `docker-compose down && docker-compose build --no-cache`
+4. **Rebuild everything** - `docker compose down && docker compose build --no-cache`
 
 ---
 
@@ -277,10 +277,10 @@ For those in a hurry:
 # 2. Open terminal in pdfgrabber-advanced folder
 
 # 3. First time
-docker-compose build
+docker compose build
 
 # 4. Every time you want to use PDFGrabber
-docker-compose run --rm pdfgrabber
+docker compose run --rm pdfgrabber
 
 # 5. PDFs are in: files/
 ```

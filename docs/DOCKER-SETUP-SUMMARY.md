@@ -91,7 +91,7 @@ All user data is preserved on the host:
 
 ### User Experience
 - **For beginners**: Double-click scripts or follow guide
-- **For advanced users**: Direct docker-compose commands
+- **For advanced users**: Direct docker compose commands
 - **For developers**: Makefile shortcuts
 
 ---
@@ -113,19 +113,19 @@ All user data is preserved on the host:
 
 ## 🚀 Quick Command Reference
 
-### Using docker-compose (All platforms)
+### Using docker compose (All platforms)
 ```bash
 # Build image (first time)
-docker-compose build
+docker compose build
 
 # Start PDFGrabber
-docker-compose run --rm pdfgrabber
+docker compose run --rm pdfgrabber
 
 # Rebuild from scratch
-docker-compose build --no-cache
+docker compose build --no-cache
 
 # Stop everything
-docker-compose down
+docker compose down
 ```
 
 ### Using Helper Scripts
@@ -207,7 +207,7 @@ When PDFGrabber is updated:
 git pull
 
 # Rebuild image
-docker-compose build
+docker compose build
 
 # Or use Make
 make update
@@ -221,7 +221,7 @@ User data (config, database, PDFs) is **never** affected by updates.
 
 ### Remove Docker Image (Keep Data)
 ```bash
-docker-compose down
+docker compose down
 docker rmi pdfgrabber-advanced:latest
 ```
 
@@ -229,13 +229,13 @@ docker rmi pdfgrabber-advanced:latest
 ```bash
 make clean
 # or
-docker-compose down --rmi all -v
+docker compose down --rmi all -v
 ```
 
 ### Remove Data Too (Complete Reset)
 ```bash
 # Remove Docker artifacts
-docker-compose down --rmi all -v
+docker compose down --rmi all -v
 
 # Remove user data (BE CAREFUL!)
 rm -rf files/

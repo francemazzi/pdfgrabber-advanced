@@ -99,8 +99,8 @@ def main():
     if all(results):
         print("✅ SUCCESSO! Tutto è installato correttamente!")
         print("\nPuoi avviare PDFGrabber con:")
-        print("  ./start.sh      (macOS/Linux)")
-        print("  start.bat       (Windows)")
+        print("  bash start-web.sh --local   (macOS/Linux)")
+        print("  start-web.bat --local       (Windows)")
     else:
         print("❌ ERRORI RILEVATI!")
         print("\nControlla i messaggi sopra e:")
@@ -113,5 +113,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 

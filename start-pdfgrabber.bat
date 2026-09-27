@@ -5,6 +5,19 @@ REM For Windows
 echo 🐳 PDFGrabber Docker Launcher
 echo.
 
+docker compose version >nul 2>&1
+if not errorlevel 1 (
+    set "COMPOSE=docker compose"
+) else (
+    where docker-compose >nul 2>&1
+    if errorlevel 1 (
+        echo Error: Docker Compose is not available. Update Docker Desktop.
+        pause
+        exit /b 1
+    )
+    set "COMPOSE=docker-compose"
+)
+
 REM Check if Docker is running
 docker info >nul 2>&1
 if %errorlevel% neq 0 (
@@ -20,7 +33,8 @@ if %errorlevel% neq 0 (
     echo 📦 First time: building Docker image...
     echo    This will take 5-10 minutes...
     echo.
-    docker-compose build
+    %COMPOSE% build
+    if errorlevel 1 exit /b 1
     echo.
     echo ✅ Image built successfully!
     echo.
@@ -29,9 +43,9 @@ if %errorlevel% neq 0 (
 REM Start PDFGrabber
 echo 🚀 Starting PDFGrabber...
 echo.
-docker-compose run --rm pdfgrabber
+%COMPOSE% run --rm pdfgrabber
+if errorlevel 1 exit /b 1
 
 echo.
 echo 👋 PDFGrabber finished. Your PDFs are in the files/ folder
 pause
-

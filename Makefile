@@ -3,6 +3,8 @@
 
 .PHONY: help build start run rebuild clean update web-build web-start web-stop web-logs web-restart
 
+COMPOSE := $(shell docker compose version >/dev/null 2>&1 && echo "docker compose" || echo "docker-compose")
+
 # Default target
 help:
 	@echo "📚 PDFGrabber Docker Commands:"
@@ -27,13 +29,13 @@ help:
 # Build Docker image
 build:
 	@echo "📦 Building Docker image..."
-	docker-compose build
+	$(COMPOSE) build
 	@echo "✅ Image built!"
 
 # Start PDFGrabber
 start:
 	@echo "🚀 Starting PDFGrabber..."
-	docker-compose run --rm pdfgrabber
+	$(COMPOSE) run --rm pdfgrabber
 	@echo "✅ Done! PDFs are in files/"
 
 # Alias for start
@@ -42,14 +44,14 @@ run: start
 # Rebuild from scratch
 rebuild:
 	@echo "🔄 Full rebuild..."
-	docker-compose down
-	docker-compose build --no-cache
+	$(COMPOSE) down
+	$(COMPOSE) build --no-cache
 	@echo "✅ Rebuild completed!"
 
 # Clean everything
 clean:
 	@echo "🧹 Cleaning containers and images..."
-	docker-compose down --rmi all -v
+	$(COMPOSE) down --rmi all -v
 	@echo "✅ Cleaning completed!"
 	@echo "⚠️  Your PDFs, config and database are safe!"
 
@@ -57,7 +59,7 @@ clean:
 update:
 	@echo "🔄 Updating PDFGrabber..."
 	git pull
-	docker-compose build
+	$(COMPOSE) build
 	@echo "✅ Update completed!"
 
 # ============== WEB UI COMMANDS ==============
@@ -65,51 +67,35 @@ update:
 # Build Web UI images
 web-build:
 	@echo "📦 Building Web UI images..."
-	docker-compose -f docker-compose.web.yml build
+	$(COMPOSE) -f docker-compose.web.yml build
 	@echo "✅ Web UI images built!"
 
 # Start Web UI
 web-start:
-	@echo "🚀 Starting PDFGrabber Web UI..."
-	@echo "🔧 Checking required files..."
-	@if [ ! -f db.json ] || [ -d db.json ]; then \
-		rm -rf db.json 2>/dev/null; \
-		echo '{}' > db.json; \
-		echo "   ✓ Created db.json"; \
-	fi
-	@if [ ! -f config.ini ] || [ -d config.ini ]; then \
-		rm -rf config.ini 2>/dev/null; \
-		cp config-default.ini config.ini; \
-		echo "   ✓ Created config.ini"; \
-	fi
-	@mkdir -p files
-	docker-compose -f docker-compose.web.yml up -d
-	@echo "✅ Web UI started!"
-	@echo "🌐 Open http://localhost:6066 in your browser"
+	bash ./start-web.sh --docker
 
 # Stop Web UI
 web-stop:
 	@echo "🛑 Stopping Web UI..."
-	docker-compose -f docker-compose.web.yml down
+	$(COMPOSE) -f docker-compose.web.yml down
 	@echo "✅ Web UI stopped!"
 
 # View Web UI logs
 web-logs:
 	@echo "📋 Viewing Web UI logs (Ctrl+C to exit)..."
-	docker-compose -f docker-compose.web.yml logs -f
+	$(COMPOSE) -f docker-compose.web.yml logs -f
 
 # Restart Web UI
 web-restart:
 	@echo "🔄 Restarting Web UI..."
-	docker-compose -f docker-compose.web.yml restart
+	$(COMPOSE) -f docker-compose.web.yml restart
 	@echo "✅ Web UI restarted!"
 
 # Full Web rebuild
 web-rebuild:
 	@echo "🔄 Full Web UI rebuild..."
-	docker-compose -f docker-compose.web.yml down
-	docker-compose -f docker-compose.web.yml build --no-cache
-	docker-compose -f docker-compose.web.yml up -d
+	$(COMPOSE) -f docker-compose.web.yml down
+	$(COMPOSE) -f docker-compose.web.yml build --no-cache
+	$(COMPOSE) -f docker-compose.web.yml up -d
 	@echo "✅ Web UI rebuild completed!"
 	@echo "🌐 Open http://localhost:6066"
-

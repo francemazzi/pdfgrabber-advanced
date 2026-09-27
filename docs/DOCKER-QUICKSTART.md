@@ -44,12 +44,12 @@ Go to: **https://www.docker.com/products/docker-desktop/**
 
 2. **Build the Docker image** (takes 5-10 minutes)
    ```bash
-   docker-compose build
+   docker compose build
    ```
 
 3. **Start PDFGrabber**
    ```bash
-   docker-compose run --rm pdfgrabber
+   docker compose run --rm pdfgrabber
    ```
 
 ### Subsequent Uses
@@ -57,7 +57,7 @@ Go to: **https://www.docker.com/products/docker-desktop/**
 Every time you want to use PDFGrabber, just one command:
 
 ```bash
-docker-compose run --rm pdfgrabber
+docker compose run --rm pdfgrabber
 ```
 
 ---
@@ -84,16 +84,16 @@ pdfgrabber-advanced/
 
 ```bash
 # Build/rebuild image (first time or after updates)
-docker-compose build
+docker compose build
 
 # Start PDFGrabber
-docker-compose run --rm pdfgrabber
+docker compose run --rm pdfgrabber
 
 # Stop everything
-docker-compose down
+docker compose down
 
 # Rebuild from scratch (if something goes wrong)
-docker-compose build --no-cache
+docker compose build --no-cache
 ```
 
 ---
@@ -112,8 +112,8 @@ docker-compose build --no-cache
 ### Generic errors
 ➡️ Try rebuilding from scratch:
 ```bash
-docker-compose down
-docker-compose build --no-cache
+docker compose down
+docker compose build --no-cache
 ```
 
 ---
@@ -152,10 +152,10 @@ For Italian version: **[DOCKER-GUIDA-RAPIDA.md](DOCKER-GUIDA-RAPIDA.md)**
 #    https://www.docker.com/products/docker-desktop/
 
 # 2. Build (first time)
-docker-compose build
+docker compose build
 
 # 3. Use PDFGrabber (always)
-docker-compose run --rm pdfgrabber
+docker compose run --rm pdfgrabber
 
 # 4. Find PDFs
 #    In folder: files/

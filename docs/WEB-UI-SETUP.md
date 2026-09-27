@@ -160,15 +160,18 @@ docs/
 
 ### Quick Start
 
-**Option 1: Helper Scripts**
+**Option 1: Canonical launcher (recommended)**
 
 ```bash
 # Windows
 start-web.bat
 
 # macOS/Linux
-./start-web.sh
+bash start-web.sh
 ```
+
+Press Enter for Docker or choose option 2 for local Python. The launcher opens
+the browser only after the frontend-to-backend health check succeeds.
 
 **Option 2: Make**
 
@@ -179,7 +182,7 @@ make web-start
 **Option 3: Docker Compose**
 
 ```bash
-docker-compose -f docker-compose.web.yml up -d
+docker compose -f docker-compose.web.yml up -d
 ```
 
 Then open: **http://localhost:6066**
@@ -238,7 +241,7 @@ Then open: **http://localhost:6066**
 make web-logs
 
 # Or
-docker-compose -f docker-compose.web.yml logs -f
+docker compose -f docker-compose.web.yml logs -f
 ```
 
 ### Stop Web UI
@@ -247,7 +250,7 @@ docker-compose -f docker-compose.web.yml logs -f
 make web-stop
 
 # Or
-docker-compose -f docker-compose.web.yml down
+docker compose -f docker-compose.web.yml down
 ```
 
 ### Restart
@@ -256,7 +259,7 @@ docker-compose -f docker-compose.web.yml down
 make web-restart
 
 # Or
-docker-compose -f docker-compose.web.yml restart
+docker compose -f docker-compose.web.yml restart
 ```
 
 ### Rebuild
@@ -265,8 +268,8 @@ docker-compose -f docker-compose.web.yml restart
 make web-rebuild
 
 # Or
-docker-compose -f docker-compose.web.yml build --no-cache
-docker-compose -f docker-compose.web.yml up -d
+docker compose -f docker-compose.web.yml build --no-cache
+docker compose -f docker-compose.web.yml up -d
 ```
 
 ---
@@ -425,9 +428,9 @@ git pull
 make web-rebuild
 
 # Or manually
-docker-compose -f docker-compose.web.yml down
-docker-compose -f docker-compose.web.yml build --no-cache
-docker-compose -f docker-compose.web.yml up -d
+docker compose -f docker-compose.web.yml down
+docker compose -f docker-compose.web.yml build --no-cache
+docker compose -f docker-compose.web.yml up -d
 ```
 
 ---
@@ -540,7 +543,7 @@ You now have a fully functional, modern web interface for PDFGrabber!
 **Start Downloading:**
 
 ```bash
-./start-web.sh  # or start-web.bat
+bash start-web.sh  # or start-web.bat
 ```
 
 Then open: **http://localhost:6066**

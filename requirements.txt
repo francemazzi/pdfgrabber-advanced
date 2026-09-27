@@ -4,5 +4,5 @@ requests
 pycryptodome
 u-msgpack-python
 tinydb
-playwright
+playwright==1.63.0
 lxml

@@ -1,150 +1,107 @@
-#!/bin/bash
-# PDFGrabber Web - Start Script (macOS/Linux)
-# Avvia PDFGrabber Web UI senza Docker
+#!/usr/bin/env bash
 
-set -e
+set -o pipefail
 
-echo "🚀 PDFGrabber Web - Avvio senza Docker"
-echo "======================================"
-echo ""
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+URL="http://localhost:6066"
+SETUP_LOG="$ROOT_DIR/pdfgrabber-setup.log"
+SERVER_LOG="$ROOT_DIR/server.log"
+OPEN_BROWSER=1
+SERVER_PID=""
 
-# Colori per output
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-RED='\033[0;31m'
-NC='\033[0m' # No Color
+[ "${1:-}" = "--no-open" ] && OPEN_BROWSER=0
 
-# Verifica Python
-echo "🔍 Verifica installazione Python..."
-if ! command -v python3 &> /dev/null; then
-    echo -e "${RED}❌ Python 3 non trovato!${NC}"
-    echo "Installa Python 3.10 o superiore da https://www.python.org/downloads/"
-    exit 1
-fi
-
-PYTHON_VERSION=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
-REQUIRED_VERSION="3.10"
-
-if [ "$(printf '%s\n' "$REQUIRED_VERSION" "$PYTHON_VERSION" | sort -V | head -n1)" != "$REQUIRED_VERSION" ]; then 
-    echo -e "${RED}❌ Python $PYTHON_VERSION trovato, ma è richiesto Python $REQUIRED_VERSION o superiore${NC}"
-    exit 1
-fi
-
-echo -e "${GREEN}✓ Python $PYTHON_VERSION trovato${NC}"
-echo ""
-
-# Crea virtual environment se non esiste
-if [ ! -d "venv" ]; then
-    echo "📦 Creazione ambiente virtuale..."
-    python3 -m venv venv
-    echo -e "${GREEN}✓ Ambiente virtuale creato${NC}"
-else
-    echo -e "${GREEN}✓ Ambiente virtuale già esistente${NC}"
-fi
-echo ""
-
-# Attiva virtual environment
-echo "🔧 Attivazione ambiente virtuale..."
-source venv/bin/activate
-echo -e "${GREEN}✓ Ambiente virtuale attivato${NC}"
-echo ""
-
-# Installa/aggiorna dipendenze
-echo "📚 Installazione dipendenze..."
-echo "   Questo potrebbe richiedere alcuni minuti alla prima esecuzione..."
-pip install --upgrade pip > /dev/null 2>&1
-pip install -r backend/requirements.txt > /dev/null 2>&1
-echo -e "${GREEN}✓ Dipendenze installate${NC}"
-echo ""
-
-# Crea directory files se non esiste
-mkdir -p files
-echo -e "${GREEN}✓ Directory files pronta${NC}"
-echo ""
-
-# Funzione per pulire i processi in uscita
+fail() {
+  printf '\n[ERRORE/ERROR %s] %s\n' "$1" "$2" >&2
+  exit 1
+}
+open_browser() {
+  [ "$OPEN_BROWSER" -eq 0 ] && return
+  if command -v open >/dev/null 2>&1; then open "$URL" >/dev/null 2>&1 &
+  elif command -v xdg-open >/dev/null 2>&1; then xdg-open "$URL" >/dev/null 2>&1 &
+  else printf 'Apri manualmente / Open manually: %s\n' "$URL"; fi
+}
+ready() {
+  command -v curl >/dev/null 2>&1 &&
+    curl -fsS --max-time 3 "$URL/api/services" 2>/dev/null | grep -q '"services"'
+}
 cleanup() {
-    echo ""
-    echo "🛑 Arresto server..."
-    if [ ! -z "$SERVER_PID" ]; then
-        kill $SERVER_PID 2>/dev/null || true
-    fi
-    echo -e "${GREEN}✓ Server arrestato${NC}"
-    echo "Arrivederci! 👋"
-    exit 0
+  trap - EXIT INT TERM
+  if [ -n "$SERVER_PID" ] && kill -0 "$SERVER_PID" 2>/dev/null; then
+    printf '\nArresto server / Stopping server...\n'
+    kill "$SERVER_PID" 2>/dev/null || true
+    wait "$SERVER_PID" 2>/dev/null || true
+  fi
+}
+ensure_data() {
+  local path
+  for path in config.ini db.json; do
+    [ ! -e "$ROOT_DIR/$path" ] || [ -f "$ROOT_DIR/$path" ] ||
+      fail PG-START-005 "$path non e un file; nessun dato e stato modificato. / $path is not a file; no data was changed."
+  done
+  [ ! -e "$ROOT_DIR/files" ] || [ -d "$ROOT_DIR/files" ] ||
+    fail PG-START-005 "files non e una cartella. / files is not a directory."
+  [ -f "$ROOT_DIR/config.ini" ] || cp "$ROOT_DIR/config-default.ini" "$ROOT_DIR/config.ini"
+  [ -f "$ROOT_DIR/db.json" ] || printf '{}\n' > "$ROOT_DIR/db.json"
+  [ -d "$ROOT_DIR/files" ] || mkdir "$ROOT_DIR/files"
 }
 
+cd "$ROOT_DIR" || fail PG-START-000 "Cartella progetto non accessibile. / Project directory is unavailable."
+PYTHON_BIN="$(command -v python3 || command -v python || true)"
+[ -n "$PYTHON_BIN" ] || fail PG-START-101 "Python 3.10+ non e installato. / Python 3.10+ is not installed."
+"$PYTHON_BIN" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)' ||
+  fail PG-START-102 "Serve Python 3.10 o superiore. / Python 3.10 or newer is required."
+
+ensure_data
+if ready; then
+  open_browser
+  printf 'PDFGrabber e gia pronto / PDFGrabber is already ready: %s\n' "$URL"
+  exit 0
+fi
+if command -v lsof >/dev/null 2>&1 && lsof -nP -iTCP:6066 -sTCP:LISTEN >/dev/null 2>&1; then
+  fail PG-START-004 "La porta 6066 e usata da un altro programma. / Port 6066 is used by another program."
+fi
+
+printf 'Preparo Python / Preparing Python...\n'
+if [ ! -x "$ROOT_DIR/venv/bin/python" ]; then
+  "$PYTHON_BIN" -m venv "$ROOT_DIR/venv" >"$SETUP_LOG" 2>&1 || {
+    tail -n 40 "$SETUP_LOG" >&2
+    fail PG-START-103 "Creazione ambiente virtuale fallita. / Failed to create the virtual environment."
+  }
+fi
+VENV_PYTHON="$ROOT_DIR/venv/bin/python"
+if ! "$VENV_PYTHON" -m pip install -r "$ROOT_DIR/backend/requirements.txt" >"$SETUP_LOG" 2>&1; then
+  tail -n 40 "$SETUP_LOG" >&2
+  fail PG-START-104 "Installazione dipendenze fallita. / Dependency installation failed."
+fi
+if ! "$VENV_PYTHON" -m playwright install chromium >>"$SETUP_LOG" 2>&1; then
+  tail -n 40 "$SETUP_LOG" >&2
+  fail PG-START-105 "Installazione Chromium fallita. / Chromium installation failed."
+fi
+
+printf 'Avvio server / Starting server...\n'
+"$VENV_PYTHON" -m uvicorn backend.main:app --host 0.0.0.0 --port 6066 --log-level info >"$SERVER_LOG" 2>&1 &
+SERVER_PID=$!
 trap cleanup EXIT INT TERM
 
-# Avvia server integrato (backend + frontend)
-echo "🚀 Avvio PDFGrabber Web Server (porta 6066)..."
-cd backend
-python3 -m uvicorn main:app --host 0.0.0.0 --port 6066 --log-level warning > ../server.log 2>&1 &
-SERVER_PID=$!
-cd ..
-sleep 2
-
-# Verifica che il server sia avviato
-if ! kill -0 $SERVER_PID 2>/dev/null; then
-    echo -e "${RED}❌ Errore nell'avvio del server${NC}"
-    echo "Controlla il file server.log per dettagli"
-    exit 1
-fi
-echo -e "${GREEN}✓ Server avviato (PID: $SERVER_PID)${NC}"
-echo ""
-
-# Attendi che il server sia pronto
-echo "⏳ Attesa avvio completo del server..."
-for i in {1..30}; do
-    if curl -s http://localhost:6066/ > /dev/null 2>&1; then
-        echo -e "${GREEN}✓ Server pronto!${NC}"
-        break
-    fi
-    if [ $i -eq 30 ]; then
-        echo -e "${RED}❌ Timeout: il server non risponde${NC}"
-        exit 1
-    fi
-    sleep 1
+elapsed=0
+while [ "$elapsed" -lt 60 ]; do
+  if ready; then break; fi
+  if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+    tail -n 80 "$SERVER_LOG" >&2
+    fail PG-START-106 "Il server si e arrestato. / The server stopped unexpectedly."
+  fi
+  sleep 1; elapsed=$((elapsed + 1))
 done
-echo ""
-
-# Apri il browser
-echo "🌐 Apertura browser..."
-URL="http://localhost:6066"
-
-if command -v xdg-open &> /dev/null; then
-    xdg-open "$URL" > /dev/null 2>&1
-elif command -v open &> /dev/null; then
-    open "$URL"
-elif command -v start &> /dev/null; then
-    start "$URL"
-else
-    echo -e "${YELLOW}⚠️  Impossibile aprire il browser automaticamente${NC}"
-    echo "Apri manualmente: $URL"
+if ! ready; then
+  tail -n 80 "$SERVER_LOG" >&2
+  fail PG-START-107 "Il server non risponde entro 60 secondi. / The server did not respond within 60 seconds."
 fi
-echo ""
 
-# Informazioni finali
-echo "======================================"
-echo -e "${GREEN}✅ PDFGrabber Web è in esecuzione!${NC}"
-echo "======================================"
-echo ""
-echo "📍 Web UI:     $URL"
-echo "🔌 API:        http://localhost:6066/api"
-echo ""
-echo "📁 I file scaricati saranno in: files/"
-echo ""
-echo -e "${YELLOW}Premi Ctrl+C per arrestare il server${NC}"
-echo ""
-
-# Mantieni lo script in esecuzione
-while true; do
-    # Verifica che il server sia ancora attivo
-    if ! kill -0 $SERVER_PID 2>/dev/null; then
-        echo -e "${RED}❌ Il server si è arrestato inaspettatamente${NC}"
-        echo "Controlla il file server.log per dettagli"
-        exit 1
-    fi
-    sleep 5
-done
-
+open_browser
+printf '\nPDFGrabber e pronto / PDFGrabber is ready: %s\n' "$URL"
+printf 'Premi Ctrl+C per arrestare / Press Ctrl+C to stop.\n\n'
+wait "$SERVER_PID"
+status=$?
+SERVER_PID=""
+exit "$status"

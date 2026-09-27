@@ -4,6 +4,15 @@
 
 set -e
 
+if docker compose version >/dev/null 2>&1; then
+    COMPOSE=(docker compose)
+elif command -v docker-compose >/dev/null 2>&1; then
+    COMPOSE=(docker-compose)
+else
+    echo "❌ Error: Docker Compose is not available. Update Docker Desktop."
+    exit 1
+fi
+
 echo "🐳 PDFGrabber Docker Launcher"
 echo ""
 
@@ -19,7 +28,7 @@ if ! docker images | grep -q "pdfgrabber-advanced"; then
     echo "📦 First time: building Docker image..."
     echo "   This will take 5-10 minutes..."
     echo ""
-    docker-compose build
+    "${COMPOSE[@]}" build
     echo ""
     echo "✅ Image built successfully!"
     echo ""
@@ -28,8 +37,7 @@ fi
 # Start PDFGrabber
 echo "🚀 Starting PDFGrabber..."
 echo ""
-docker-compose run --rm pdfgrabber
+"${COMPOSE[@]}" run --rm pdfgrabber
 
 echo ""
 echo "👋 PDFGrabber finished. Your PDFs are in the files/ folder"
-

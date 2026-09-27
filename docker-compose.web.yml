@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   # Backend API Service
   backend:
@@ -8,6 +6,8 @@ services:
       dockerfile: backend/Dockerfile
     container_name: pdfgrabber-backend
     hostname: backend
+    init: true
+    ipc: host
     restart: unless-stopped
     volumes:
       # Mount user data for persistence (config and files)
@@ -48,6 +48,12 @@ services:
     environment:
       - NGINX_HOST=localhost
       - NGINX_PORT=80
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/api/services | grep -q '\"services\"'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
 
 networks:
   pdfgrabber-network:

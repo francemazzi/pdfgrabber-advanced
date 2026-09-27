@@ -69,7 +69,8 @@ Redistribution of PDFs is highly discouraged and not supported by the Author.
 
 # 🌐 Web Interface (Easiest - Recommended!)
 
-**NEW!** Beautiful web interface - no command line needed!
+One launcher handles Docker and the local Python installation. Docker is the
+recommended default: press Enter when the launcher asks which mode to use.
 
 **🚀 Quick Start:**
 
@@ -89,12 +90,16 @@ Redistribution of PDFs is highly discouraged and not supported by the Author.
    # Windows
    start-web.bat
 
-   # macOS/Linux
-   ./start-web.sh
+   # macOS/Linux (works also after downloading the ZIP)
+   bash start-web.sh
    ```
 
-4. Open your browser at **http://localhost:6066**
+4. Press Enter to use Docker. The launcher starts Docker Desktop when possible,
+   waits until PDFGrabber is healthy, and opens **http://localhost:6066**.
 5. Click, login, and download! 🎉
+
+For unattended startup, use `bash start-web.sh --docker` or
+`start-web.bat --docker`. Add `--no-open` to avoid opening the browser.
 
 📖 **Full Guide:** [WEB-UI-GUIDE.md](docs/WEB-UI-GUIDE.md)
 
@@ -138,9 +143,9 @@ update.bat
 
 These scripts will:
 1. ✅ Pull latest code from Git
-2. ✅ Stop Docker containers
-3. ✅ Rebuild and restart with new code
-4. ✅ Open browser at localhost:6066
+2. ✅ Rebuild and restart with new code
+3. ✅ Verify the Web UI
+4. ✅ Open the browser at localhost:6066
 
 Perfect for getting new features and bug fixes!
 
@@ -156,8 +161,8 @@ For command-line users who prefer the terminal.
 2. Open terminal in the pdfgrabber directory
 3. Run:
    ```bash
-   docker-compose build
-   docker-compose run --rm pdfgrabber
+   docker compose build
+   docker compose run --rm pdfgrabber
    ```
 
 **Helper Scripts:**
@@ -195,14 +200,14 @@ For command-line users who prefer the terminal.
 
    Or download the ZIP from the green "Code" button and extract it
 
-3. **Run the start script:**
+3. **Run the same launcher and choose option 2:**
 
    ```bash
    # Windows
-   start.bat
+   start-web.bat --local
 
    # macOS/Linux
-   ./start.sh
+   bash start-web.sh --local
    ```
 
 The script will:
