@@ -10,6 +10,7 @@ $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ComposeFile = Join-Path $Root "docker-compose.web.yml"
 $Url = "http://localhost:6066"
 $script:UseComposeV2 = $false
+$script:ComposeExitCode = 0
 
 function Fail([string]$Code, [string]$Message) {
     Write-Host "`n[ERRORE/ERROR $Code] $Message" -ForegroundColor Red
@@ -56,7 +57,15 @@ function Ensure-Data {
     catch { Fail "PG-START-005" "db.json non contiene JSON valido. / db.json is invalid JSON." }
 }
 function Invoke-Compose([string[]]$Arguments) {
-    if ($script:UseComposeV2) { & docker compose @Arguments } else { & docker-compose @Arguments }
+    $previousErrorAction = $ErrorActionPreference
+    try {
+        # Windows PowerShell reports normal Docker stderr progress as NativeCommandError.
+        $ErrorActionPreference = "Continue"
+        if ($script:UseComposeV2) { & docker compose @Arguments } else { & docker-compose @Arguments }
+        $script:ComposeExitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousErrorAction
+    }
 }
 function Show-DockerDiagnostics {
     Write-Host "`n--- Docker status ---"
@@ -108,7 +117,7 @@ function Run-Docker {
     Write-Host "`nAvvio PDFGrabber con Docker... / Starting PDFGrabber with Docker..."
     $log = Join-Path $Root "pdfgrabber-start.log"
     Invoke-Compose @("-f", $ComposeFile, "up", "-d", "--build") 2>&1 | Tee-Object -FilePath $log
-    if ($LASTEXITCODE -ne 0) {
+    if ($script:ComposeExitCode -ne 0) {
         Show-DockerDiagnostics
         Fail "PG-START-006" "Docker non ha avviato i servizi. / Docker failed to start the services."
     }

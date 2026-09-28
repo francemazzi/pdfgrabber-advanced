@@ -198,6 +198,53 @@ class StartWebLauncherTests(unittest.TestCase):
         self.assertNotEqual(bad_result.returncode, 0)
         self.assertIn("PG-START-000", bad_result.stderr)
 
+    def test_windows_compose_progress_does_not_abort_launcher(self):
+        powershell = shutil.which("pwsh") or shutil.which("powershell")
+        if not powershell:
+            self.skipTest("PowerShell is not installed")
+        command = textwrap.dedent(
+            """
+            $tokens = $null
+            $errors = $null
+            $ast = [System.Management.Automation.Language.Parser]::ParseFile(
+                $env:LAUNCHER_SCRIPT, [ref]$tokens, [ref]$errors
+            )
+            $function = $ast.Find({
+                param($node)
+                $node -is [System.Management.Automation.Language.FunctionDefinitionAst] -and
+                    $node.Name -eq "Invoke-Compose"
+            }, $true)
+            Invoke-Expression $function.Extent.Text
+            $ErrorActionPreference = "Stop"
+            $script:UseComposeV2 = $true
+            function docker {
+                Write-Error "pdfgrabber-advanced-main-backend Built"
+                $global:LASTEXITCODE = 0
+            }
+            Invoke-Compose @("up", "-d", "--build") 2>&1 | Out-Null
+            if ($script:ComposeExitCode -ne 0) { exit 2 }
+            function docker {
+                Write-Error "real Docker failure"
+                $global:LASTEXITCODE = 42
+            }
+            Invoke-Compose @("up", "-d", "--build") 2>&1 | Out-Null
+            if ($script:ComposeExitCode -ne 42) { exit 3 }
+            Write-Output "continued"
+            """
+        )
+        env = os.environ.copy()
+        env["LAUNCHER_SCRIPT"] = str(ROOT / "start-web.ps1")
+        result = subprocess.run(
+            [powershell, "-NoLogo", "-NoProfile", "-Command", command],
+            env=env,
+            text=True,
+            capture_output=True,
+            timeout=10,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("continued", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()
